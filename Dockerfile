@@ -1,20 +1,20 @@
-# Base image
 FROM python:3.10-slim
 
-# Set working directory
+# 1. Set working directory
 WORKDIR /app
 
-# Copy requirements
+# 2. Copy only requirements first to leverage Docker caching
 COPY requirements.txt .
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# 3. Install dependencies without cache and remove pip cache folder
+RUN pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /root/.cache/pip
 
-# Copy all files
+# 4. Copy the rest of the project
 COPY . .
 
-# Expose FastAPI port
-EXPOSE 8000
+# 5. Optional: remove apt cache if you install system packages
+# RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Run the app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 6. Run the application
+CMD ["python", "main.py"]
